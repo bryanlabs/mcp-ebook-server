@@ -124,7 +124,53 @@ Once configured, you can ask your AI assistant questions like:
 
 ## Kubernetes Deployment
 
-For Kubernetes deployments, see the example manifests in the [bare-metal repo](https://github.com/bryanlabs/bare-metal/tree/main/cluster/media-suite/mcp-ebook-server).
+Example Kubernetes manifests:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-ebook-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-ebook-server
+  template:
+    metadata:
+      labels:
+        app: mcp-ebook-server
+    spec:
+      containers:
+        - name: mcp-ebook-server
+          image: ghcr.io/bryanlabs/mcp-ebook-server:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: EBOOK_LIBRARY_PATH
+              value: "/ebooks"
+          volumeMounts:
+            - name: ebooks
+              mountPath: /ebooks
+              readOnly: true
+      volumes:
+        - name: ebooks
+          persistentVolumeClaim:
+            claimName: ebooks-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-ebook-server
+spec:
+  type: NodePort
+  selector:
+    app: mcp-ebook-server
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 32080
+```
 
 ## License
 
