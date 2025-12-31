@@ -2,7 +2,7 @@
 
 An MCP (Model Context Protocol) server that provides AI assistants with direct access to your ebook library. Works with Claude in Cursor, and other MCP-compatible clients.
 
-<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=ebooks&config=eyJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvc3NlIn0K"></a>
+[Install in Cursor](cursor://anysphere.cursor-deeplink/mcp/install?name=ebooks&config=eyJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvc3NlIn0K)
 
 > **Note:** The one-click install assumes the server is running on `localhost:8080`. For remote servers, see [Client Integration](#client-integration).
 
@@ -83,7 +83,7 @@ Once the server is running, connect your AI client to `http://localhost:8080/sse
 
 **One-click install (localhost):**
 
-<a href="cursor://anysphere.cursor-deeplink/mcp/install?name=ebooks&config=eyJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvc3NlIn0K"><img src="https://img.shields.io/badge/Install_in_Cursor-blue" alt="Install in Cursor" /></a>
+[Install in Cursor](cursor://anysphere.cursor-deeplink/mcp/install?name=ebooks&config=eyJ1cmwiOiJodHRwOi8vbG9jYWxob3N0OjgwODAvc3NlIn0K)
 
 **Or manually edit** `~/.cursor/mcp.json`:
 
