@@ -1,0 +1,8 @@
+# MCP Ebook Server Dependencies
+mcp>=1.0.0
+ebooklib>=0.18
+beautifulsoup4>=4.12.0
+lxml>=5.0.0
+uvicorn>=0.30.0
+starlette>=0.38.0
+

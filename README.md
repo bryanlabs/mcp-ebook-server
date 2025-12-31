@@ -1,0 +1,132 @@
+# MCP Ebook Server
+
+An MCP (Model Context Protocol) server that provides AI assistants with direct access to your ebook library. Works with Claude in Cursor, and other MCP-compatible clients.
+
+## Features
+
+- **List books** in your library with metadata (title, author, language)
+- **Read chapters** individually or in ranges
+- **Search** within books or across your entire library
+- **EPUB support** with automatic text extraction
+
+## Installation
+
+### Docker (Recommended)
+
+```bash
+docker run -p 8080:8080 -v /path/to/your/ebooks:/ebooks ghcr.io/bryanlabs/mcp-ebook-server:latest
+```
+
+### Docker Compose
+
+```yaml
+services:
+  mcp-ebook-server:
+    image: ghcr.io/bryanlabs/mcp-ebook-server:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - /path/to/your/ebooks:/ebooks:ro
+```
+
+### pip
+
+```bash
+pip install git+https://github.com/bryanlabs/mcp-ebook-server.git
+mcp-ebook-server --library-path /path/to/your/ebooks
+```
+
+### From Source
+
+```bash
+git clone https://github.com/bryanlabs/mcp-ebook-server.git
+cd mcp-ebook-server
+pip install -e .
+mcp-ebook-server
+```
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EBOOK_LIBRARY_PATH` | `/ebooks` | Path to your ebook directory |
+| `MCP_HOST` | `0.0.0.0` | Host to bind the server |
+| `MCP_PORT` | `8080` | Port for the SSE endpoint |
+
+## Cursor IDE Setup
+
+Add to your `~/.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
+
+Then reload Cursor (Cmd+Shift+P -> "Developer: Reload Window").
+
+## Available Tools
+
+### `list_books()`
+Lists all ebooks in your library with metadata.
+
+**Example:** "What books do I have?"
+
+### `get_book_info(book_path)`
+Get detailed information about a book including chapter list.
+
+**Example:** "How many chapters are in The Magicians?"
+
+### `get_chapter(book_path, chapter_number)`
+Read a specific chapter's full text.
+
+**Example:** "Read chapter 1 of The Magicians"
+
+### `get_chapters_range(book_path, start_chapter, end_chapter)`
+Read multiple chapters at once.
+
+**Example:** "Get chapters 1 through 3 of The Magicians"
+
+### `search_book(book_path, query)`
+Search for text within a specific book.
+
+**Example:** "Find all mentions of 'magic' in The Magicians"
+
+### `search_library(query)`
+Search across all books in your library.
+
+**Example:** "Search all my books for 'dragon'"
+
+## Supported Formats
+
+| Format | Status |
+|--------|--------|
+| EPUB | Fully supported |
+| MOBI | Requires conversion to EPUB |
+| AZW3 | Requires conversion to EPUB |
+| PDF | Not supported |
+
+## Example Queries
+
+Once configured, you can ask your AI assistant questions like:
+
+- "What books do I have in my library?"
+- "Without spoilers past chapter 3, who is Quentin in The Magicians?"
+- "Find all mentions of 'Brakebills' in chapter 1"
+- "Summarize what happens in chapters 1-3 of The Magicians"
+
+## Kubernetes Deployment
+
+For Kubernetes deployments, see the example manifests in the [bare-metal repo](https://github.com/bryanlabs/bare-metal/tree/main/cluster/media-suite/mcp-ebook-server).
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
