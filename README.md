@@ -71,9 +71,13 @@ mcp-ebook-server
 | `MCP_HOST` | `0.0.0.0` | Host to bind the server |
 | `MCP_PORT` | `8080` | Port for the SSE endpoint |
 
-## Cursor IDE Setup
+## Client Integration
 
-Add to your `~/.cursor/mcp.json`:
+Once the server is running, connect your AI client to `http://localhost:8080/sse` (or your server's URL).
+
+### Cursor IDE
+
+Edit `~/.cursor/mcp.json`:
 
 ```json
 {
@@ -86,7 +90,117 @@ Add to your `~/.cursor/mcp.json`:
 }
 ```
 
-Then reload Cursor (Cmd+Shift+P -> "Developer: Reload Window").
+Reload Cursor: `Cmd+Shift+P` → "Developer: Reload Window"
+
+---
+
+### Claude Desktop
+
+Edit the config file:
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "command": "docker",
+      "args": [
+        "run", "-i", "--rm",
+        "-v", "/path/to/your/ebooks:/ebooks:ro",
+        "ghcr.io/bryanlabs/mcp-ebook-server:latest"
+      ]
+    }
+  }
+}
+```
+
+Or if running the server separately (Docker/remote):
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
+
+Restart Claude Desktop to apply changes.
+
+---
+
+### Claude Code (CLI)
+
+```bash
+# Add the server
+claude mcp add ebooks --transport sse --url http://localhost:8080/sse
+
+# Verify it's added
+claude mcp list
+
+# Or import from Claude Desktop if already configured there
+claude mcp add-from-claude-desktop
+```
+
+---
+
+### VS Code (with Copilot/Continue)
+
+For VS Code with MCP-compatible extensions, create `.vscode/mcp.json` in your workspace:
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
+
+Or use the Command Palette: `MCP: Add Server` → select SSE → enter the URL.
+
+---
+
+### ChatGPT Desktop
+
+Edit the config file:
+- **macOS:** `~/Library/Application Support/ChatGPT/chatgpt_desktop_config.json`
+- **Windows:** `%APPDATA%\ChatGPT\chatgpt_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "type": "sse",
+      "url": "http://localhost:8080/sse"
+    }
+  }
+}
+```
+
+Restart ChatGPT Desktop to apply changes.
+
+---
+
+### Remote/Cloud Deployment
+
+If running on a remote server or Kubernetes cluster, replace `localhost:8080` with your server's address:
+
+```json
+{
+  "mcpServers": {
+    "ebooks": {
+      "type": "sse",
+      "url": "http://your-server-ip:32080/sse"
+    }
+  }
+}
+```
 
 ## Available Tools
 
