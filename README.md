@@ -9,6 +9,22 @@ An MCP (Model Context Protocol) server that provides AI assistants with direct a
 - **Search** within books or across your entire library
 - **EPUB support** with automatic text extraction
 
+## Why Use This Instead of LLM Training Data?
+
+LLMs like Claude have read millions of books during training, but they don't actually *have* those books—they have a compressed neural representation of patterns and themes. This creates real limitations:
+
+| Question Type | LLM Training Data | MCP Ebook Server |
+|--------------|-------------------|------------------|
+| "What's the 10th word of chapter 2?" | ❌ Cannot answer | ✅ Exact answer |
+| "Quote the opening paragraph" | ⚠️ Often paraphrased or hallucinated | ✅ Verbatim text |
+| "How many times is 'magic' mentioned?" | ❌ Guesses | ✅ Precise count |
+| "What happens in chapter 5?" | ⚠️ May confuse with similar books | ✅ Actual content |
+| "Does this book mention X?" | ⚠️ Uncertain, may hallucinate | ✅ Searchable proof |
+
+**The core problem:** LLMs retain the *gist* of books—major plot points, famous quotes, general themes—but lose precise details. When asked about specifics they don't know, they often hallucinate plausible-sounding answers rather than admitting uncertainty.
+
+**The solution:** This MCP server gives AI direct access to the actual source text. Instead of guessing, the AI can read the exact chapter, search for specific terms, and cite real passages. No hallucinations, just the book.
+
 ## Installation
 
 ### Docker (Recommended)
