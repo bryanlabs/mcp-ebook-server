@@ -37,6 +37,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2 \
     libxslt1.1 \
+    curl \
     && rm -rf /var/lib/apt/lists/* \
     && useradd -m -u 1000 appuser
 
@@ -59,9 +60,9 @@ USER appuser
 # Expose the MCP server port
 EXPOSE 8080
 
-# Health check
+# Health check - MCP endpoint accepts POST
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/sse')" || exit 1
+    CMD curl -f -X POST http://localhost:8080/mcp -H "Content-Type: application/json" -H "Accept: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"ping"}' || exit 1
 
 # Run the MCP server
 CMD ["python", "-m", "mcp_ebook_server"]

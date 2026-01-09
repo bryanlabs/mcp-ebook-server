@@ -29,7 +29,7 @@ MCP_PORT = int(os.environ.get('MCP_PORT', '8080'))
 # Initialize the library
 library = EbookLibrary(LIBRARY_PATH)
 
-# Initialize FastMCP server with host/port in constructor
+# Initialize FastMCP server with host/port for SSE transport
 mcp = FastMCP(
     "ebook-server",
     host=MCP_HOST,
@@ -37,13 +37,13 @@ mcp = FastMCP(
     instructions="""
     This is an ebook library server that provides access to a collection of books.
     Use these tools to browse, read, and search ebooks.
-    
+
     Common workflows:
     1. Use list_books() to see what's available
     2. Use get_book_info() to get chapter details for a specific book
     3. Use get_chapter() to read a specific chapter
     4. Use search_book() to find specific content
-    
+
     Book paths can be specified as:
     - Relative paths from the library root (e.g., "Author Name/Book Title.epub")
     - Full file paths
@@ -56,7 +56,7 @@ mcp = FastMCP(
 def list_books() -> str:
     """
     List all ebooks in the library with their metadata.
-    
+
     Returns a JSON array of book objects with:
     - title: Book title
     - author: Book author
@@ -80,10 +80,10 @@ def list_books() -> str:
 def get_book_info(book_path: str) -> str:
     """
     Get detailed information about a specific book including its chapters.
-    
+
     Args:
         book_path: Path to the book (relative to library or full path)
-    
+
     Returns:
         JSON object with book metadata and chapter list, or error message
     """
@@ -97,11 +97,11 @@ def get_book_info(book_path: str) -> str:
 def get_chapter(book_path: str, chapter_number: int) -> str:
     """
     Get the full text content of a specific chapter.
-    
+
     Args:
         book_path: Path to the book (relative to library or full path)
         chapter_number: Chapter number (1-indexed)
-    
+
     Returns:
         The chapter text content, or error message if not found
     """
@@ -115,12 +115,12 @@ def get_chapter(book_path: str, chapter_number: int) -> str:
 def get_chapters_range(book_path: str, start_chapter: int, end_chapter: int) -> str:
     """
     Get the text content for a range of chapters.
-    
+
     Args:
         book_path: Path to the book (relative to library or full path)
         start_chapter: Starting chapter number (1-indexed, inclusive)
         end_chapter: Ending chapter number (1-indexed, inclusive)
-    
+
     Returns:
         The combined chapter text content, or error message if not found
     """
@@ -134,11 +134,11 @@ def get_chapters_range(book_path: str, start_chapter: int, end_chapter: int) -> 
 def search_book(book_path: str, query: str) -> str:
     """
     Search for text within a specific book.
-    
+
     Args:
         book_path: Path to the book (relative to library or full path)
         query: Text to search for (case-insensitive)
-    
+
     Returns:
         JSON array of matches with chapter info and surrounding context
     """
@@ -152,10 +152,10 @@ def search_book(book_path: str, query: str) -> str:
 def search_library(query: str) -> str:
     """
     Search for text across all books in the library.
-    
+
     Args:
         query: Text to search for (case-insensitive)
-    
+
     Returns:
         JSON array of matches with book info, chapter info, and context
     """
@@ -181,15 +181,14 @@ def main():
     """Run the MCP server."""
     logger.info(f"Starting MCP Ebook Server on {MCP_HOST}:{MCP_PORT}")
     logger.info(f"Library path: {LIBRARY_PATH}")
-    
+
     # Discover books on startup
     books = library.discover_books()
     logger.info(f"Found {len(books)} books in library")
-    
-    # Run with SSE transport for Cursor compatibility
-    mcp.run(transport="sse")
+
+    # Run with streamable-http transport for remote access (Cursor, Zed, etc.)
+    mcp.run(transport="streamable-http")
 
 
 if __name__ == "__main__":
     main()
-
