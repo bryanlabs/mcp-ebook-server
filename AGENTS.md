@@ -53,7 +53,7 @@ An MCP (Model Context Protocol) server that gives AI assistants direct access to
 
 **Local build:**
 ```bash
-docker buildx build --builder cloud-bryanlabs-builder --platform linux/amd64 -t ghcr.io/bryanlabs/mcp-ebook-server:latest .
+docker buildx build --builder worker1 --platform linux/amd64 -t ghcr.io/bryanlabs/mcp-ebook-server:latest .
 ```
 
 **Environment variables:**
