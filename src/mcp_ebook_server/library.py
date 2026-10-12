@@ -108,11 +108,20 @@ class EbookLibrary:
             
             return {
                 **metadata.to_dict(),
+                'contents': [
+                    {
+                        'chapter': group['chapter'],
+                        'label': group['label'],
+                        'sections': group['sections'],
+                    }
+                    for group in parser.get_chapter_groups()
+                ],
                 'chapter_count': len(chapters),
                 'chapters': [
                     {
                         'number': ch.number,
                         'title': ch.title,
+                        'chapter': ch.chapter,
                     }
                     for ch in chapters
                 ],
@@ -134,6 +143,72 @@ class EbookLibrary:
             logger.error(f"Error getting chapter {chapter_number} from {resolved_path}: {e}")
             return None
     
+    def get_book_chapter(self, book_path: str, chapter: str) -> Optional[dict]:
+        """Get a chapter by the name or number printed in the book."""
+        resolved_path = self._resolve_path(book_path)
+        if not resolved_path:
+            return None
+
+        try:
+            parser = self._get_parser(resolved_path)
+            matches = parser.find_printed_chapter(chapter)
+            if not matches:
+                return {
+                    'error': f"No chapter matching '{chapter}'",
+                    'contents': [g['label'] for g in parser.get_chapter_groups()],
+                }
+            group = matches[0]
+            text = '\n\n'.join(parser.get_chapter(n).get_text() for n in group['sections'])
+            result = {
+                'chapter': group['chapter'],
+                'label': group['label'],
+                'sections': group['sections'],
+                'text': text,
+            }
+            if len(matches) > 1:
+                result['other_matches'] = [g['label'] for g in matches[1:]]
+            return result
+        except Exception as e:
+            logger.error(f"Error getting chapter {chapter} from {resolved_path}: {e}")
+            return None
+
+    def get_section(self, book_path: str, section: int) -> Optional[dict]:
+        """Get one reading-order section with its labels and neighbours."""
+        resolved_path = self._resolve_path(book_path)
+        if not resolved_path:
+            return None
+
+        try:
+            parser = self._get_parser(resolved_path)
+            chapters = parser.get_chapters()
+            ch = parser.get_chapter(section)
+            if not ch:
+                return None
+            return {
+                'title': parser.get_metadata().title,
+                'section': ch.number,
+                'section_count': len(chapters),
+                'chapter': ch.chapter,
+                'label': ch.label,
+                'text': ch.get_text(),
+            }
+        except Exception as e:
+            logger.error(f"Error getting section {section} from {resolved_path}: {e}")
+            return None
+
+    def find_quote(self, book_path: str, quote: str) -> Optional[dict]:
+        """Locate a quoted passage in a book and return its exact wording."""
+        resolved_path = self._resolve_path(book_path)
+        if not resolved_path:
+            return None
+
+        try:
+            parser = self._get_parser(resolved_path)
+            return parser.find_quote(quote)
+        except Exception as e:
+            logger.error(f"Error finding quote in {resolved_path}: {e}")
+            return None
+
     def get_chapters_range(self, book_path: str, start: int, end: int) -> Optional[str]:
         """Get the text content of a range of chapters."""
         resolved_path = self._resolve_path(book_path)

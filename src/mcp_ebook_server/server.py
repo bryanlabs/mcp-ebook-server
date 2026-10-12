@@ -40,9 +40,12 @@ mcp = FastMCP(
 
     Common workflows:
     1. Use list_books() to see what's available
-    2. Use get_book_info() to get chapter details for a specific book
-    3. Use get_chapter() to read a specific chapter
+    2. Use get_book_info() to see a book's contents as the printed book names them
+    3. Use get_book_chapter() to read a chapter by its printed number or name
+       ("8", "Chapter Eight", "Prologue"). get_chapter() takes a section index,
+       which is the EPUB's file order and often differs from the printed chapter.
     4. Use search_book() to find specific content
+    5. Use find_quote() to check a quotation and get the book's exact wording
 
     Book paths can be specified as:
     - Relative paths from the library root (e.g., "Author Name/Book Title.epub")
@@ -94,13 +97,74 @@ def get_book_info(book_path: str) -> str:
 
 
 @mcp.tool()
-def get_chapter(book_path: str, chapter_number: int) -> str:
+def get_book_chapter(book_path: str, chapter: str) -> str:
     """
-    Get the full text content of a specific chapter.
+    Get a chapter the way a reader names it: the number or title printed in
+    the book, such as "8", "eight", "Chapter VIII", "Prologue" or "Relaxation".
+    Use this whenever someone refers to a chapter by number.
 
     Args:
         book_path: Path to the book (relative to library or full path)
-        chapter_number: Chapter number (1-indexed)
+        chapter: Printed chapter number or name
+
+    Returns:
+        JSON object with the printed chapter number, label, section indexes and text
+    """
+    result = library.get_book_chapter(book_path, chapter)
+    if result is None:
+        return f"Book not found: '{book_path}'"
+    return json.dumps(result, indent=2)
+
+
+@mcp.tool()
+def find_quote(book_path: str, quote: str) -> str:
+    """
+    Check that a quotation appears in a book and get the exact wording with
+    its chapter. Case, punctuation and quote styles are ignored, and "..."
+    in the quote skips ahead. A close but inexact match is returned with
+    "exact": false and the book's real wording.
+
+    Args:
+        book_path: Path to the book (relative to library or full path)
+        quote: The passage to look for
+
+    Returns:
+        JSON object with exact, text, chapter, label, section and surrounding text
+    """
+    result = library.find_quote(book_path, quote)
+    if result:
+        return json.dumps(result, indent=2)
+    return json.dumps({'message': f"Quote not found in '{book_path}'"})
+
+
+@mcp.tool()
+def get_section(book_path: str, section: int) -> str:
+    """
+    Get one reading-order section (EPUB file order, 1-indexed) with its
+    printed chapter label, for readers that page through a book.
+
+    Args:
+        book_path: Path to the book (relative to library or full path)
+        section: Section index from get_book_info contents
+
+    Returns:
+        JSON object with title, section, section_count, chapter, label and text
+    """
+    result = library.get_section(book_path, section)
+    if result:
+        return json.dumps(result)
+    return json.dumps({'message': f"Section {section} not found in '{book_path}'"})
+
+
+@mcp.tool()
+def get_chapter(book_path: str, chapter_number: int) -> str:
+    """
+    Get the full text of one section by its index in file order (1-indexed).
+    This index is not the printed chapter number; use get_book_chapter for that.
+
+    Args:
+        book_path: Path to the book (relative to library or full path)
+        chapter_number: Section index (1-indexed, file order)
 
     Returns:
         The chapter text content, or error message if not found
@@ -137,10 +201,10 @@ def search_book(book_path: str, query: str) -> str:
 
     Args:
         book_path: Path to the book (relative to library or full path)
-        query: Text to search for (case-insensitive)
+        query: Text to search for (case, punctuation and quote styles ignored)
 
     Returns:
-        JSON array of matches with chapter info and surrounding context
+        JSON array of matches with the printed chapter, label, section and context
     """
     results = library.search_book(book_path, query)
     if results:
@@ -154,10 +218,10 @@ def search_library(query: str) -> str:
     Search for text across all books in the library.
 
     Args:
-        query: Text to search for (case-insensitive)
+        query: Text to search for (case, punctuation and quote styles ignored)
 
     Returns:
-        JSON array of matches with book info, chapter info, and context
+        JSON array of matches with book info, printed chapter, label, and context
     """
     results = library.search_library(query)
     if results:

@@ -79,9 +79,12 @@ Once the server is running, connect your MCP client to `http://localhost:8080/ss
 |------|-------------|---------|
 | `list_books()` | List all ebooks with metadata | "What books do I have?" |
 | `get_book_info(book_path)` | Get book details and chapter list | "How many chapters in The Magicians?" |
-| `get_chapter(book_path, chapter_number)` | Read a specific chapter | "Read chapter 1" |
-| `get_chapters_range(book_path, start, end)` | Read multiple chapters | "Get chapters 1-3" |
-| `search_book(book_path, query)` | Search within a book | "Find mentions of 'magic'" |
+| `get_book_chapter(book_path, chapter)` | Read a chapter by its printed number or name | "Read chapter eight" |
+| `find_quote(book_path, quote)` | Verify a quotation and get its exact wording and chapter | "Is this line really in the book?" |
+| `get_section(book_path, section)` | Read one file-order section as JSON | (readers paging through a book) |
+| `get_chapter(book_path, chapter_number)` | Read one file-order section | "Read section 1" |
+| `get_chapters_range(book_path, start, end)` | Read several file-order sections | "Get sections 1-3" |
+| `search_book(book_path, query)` | Search within a book (ignores case, punctuation, quote styles) | "Find mentions of 'magic'" |
 | `search_library(query)` | Search all books | "Search for 'dragon'" |
 
 ## Supported Formats

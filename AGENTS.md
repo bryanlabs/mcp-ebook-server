@@ -17,11 +17,25 @@ An MCP (Model Context Protocol) server that gives AI assistants direct access to
 | Tool | Purpose |
 |------|---------|
 | `list_books()` | List all EPUBs in the library with title, author, language, relative path |
-| `get_book_info(book_path)` | Metadata + full chapter list for a specific book |
-| `get_chapter(book_path, chapter_number)` | Full text of a single chapter (1-indexed) |
-| `get_chapters_range(book_path, start_chapter, end_chapter)` | Text of a chapter range, concatenated |
-| `search_book(book_path, query)` | Case-insensitive search within one book; returns matches with context |
+| `get_book_info(book_path)` | Metadata, `contents` (printed chapters with their section indexes) and the raw section list |
+| `get_book_chapter(book_path, chapter)` | A chapter by its printed number or name ("8", "eight", "VIII", "Prologue", "Relaxation"); joins split files |
+| `find_quote(book_path, quote)` | Exact book wording, chapter and context for a quotation; `...` skips ahead; near misses come back with `exact: false` |
+| `get_section(book_path, section)` | One section as JSON with its label, for readers that page through a book |
+| `get_chapter(book_path, chapter_number)` | Full text of one section by file-order index (not the printed chapter) |
+| `get_chapters_range(book_path, start_chapter, end_chapter)` | Text of a section range, concatenated |
+| `search_book(book_path, query)` | Search within one book ignoring case, punctuation and quote styles; matches carry `chapter`, `label`, `section` |
 | `search_library(query)` | Search across all books; returns up to 5 matches per book |
+
+**Sections versus printed chapters.** A section is one EPUB spine file, in
+reading order, with at least 100 characters of text (or any text when the table
+of contents names it). Section numbers drift from printed chapter numbers because
+of front matter and split files: chapter 8 of Algorithms to Live By is section
+12. Each section's `label` comes from the EPUB table of contents; a file the
+contents does not name inherits the label of the chapter before it (split
+chapters), unless that is front or back matter. `chapter` is the printed number
+parsed from the label ("Chapter Eight", "8. Relaxation", "0008", "one"); labels
+such as "Day 1", "Part I" or a character name have none and are matched by name.
+Anything a person reads should use `label`, never the section index.
 
 **Resource:**
 
